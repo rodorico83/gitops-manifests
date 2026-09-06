@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-network-metadata
+  namespace: default
+data:
+  DB_ENDPOINT: {{ .Values.configMapData.DATABASE_ENDPOINT | quote }}
+  DB_PORT: {{ .Values.configMapData.DATABASE_PORT | quote }}

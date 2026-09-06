@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-connectivity-tester
+  namespace: default
+  labels:
+    app: db-tester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-tester
+  template:
+    metadata:
+      labels:
+        app: db-tester
+        role: backend-app
+      annotations:
+        secret.reloader.stakater.com/reload: "db-k8s-secret"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | quote }}
+      containers:
+        - name: web-validator
+          image: python:3.11-alpine
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              # 1. Instalar el driver de Postgres y Flask en memoria
+              pip install flask psycopg2-binary
+
+              # 2. Escribir el script del servidor web interactivo
+              cat << 'EOF' > app.py
+              import os, subprocess
+              from flask import Flask
+              app = Flask(__name__)
+
+              @app.route('/')
+              def check_db():
+                  db_host = os.environ.get('DB_ENDPOINT')
+                  db_port = os.environ.get('DB_PORT')
+                  db_user = os.environ.get('DB_USER')
+                  db_pass = os.environ.get('DB_PASSWORD')
+
+                  cmd = f"PGPASSWORD={db_pass} pg_isready -h {db_host} -p {db_port} -U {db_user}"
+                  result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+                  if result.returncode == 0:
+                      return """
+                      <div style='text-align:center; margin-top:10%; font-family:Arial, sans-serif;'>
+                          <h1 style='color:#2ecc71;'>✅ [ÉXITO] Conexión Híbrida Establecida</h1>
+                          <p style='font-size:18px;'>El Pod con SG dedicado ha alcanzado la base de datos de AWS de forma segura.</p>
+                          <p style='color:#7f8c8d;'>Endpoint: {0} | Puerto: {1}</p>
+                      </div>
+                      """.format(db_host, db_port)
+                  else:
+                      return """
+                      <div style='text-align:center; margin-top:10%; font-family:Arial, sans-serif;'>
+                          <h1 style='color:#e74c3c;'>❌ [FALLO] Conexión Interrumpida</h1>
+                          <p style='font-size:18px; color:#c0392b;'>Tiempo de espera agotado. Revise tablas de rutas, VPN o Security Groups.</p>
+                          <p style='color:#7f8c8d;'>Endpoint: {0} | Puerto: {1}</p>
+                      </div>
+                      """.format(db_host, db_port)
+
+              if __name__ == '__main__':
+                  app.run(host='0.0.0.0', port=8080)
+              EOF
+
+              # 3. Arrancar el servidor web
+              echo "Iniciando validador web en el puerto 8080..."
+              python app.py
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: database-network-metadata
+                  key: DB_ENDPOINT
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: database-network-metadata
+                  key: DB_PORT
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-k8s-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-k8s-secret
+                  key: password
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: "secrets-store.csi.k8s.io"
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "aws-db-secrets-provider"

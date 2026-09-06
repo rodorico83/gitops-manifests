@@ -1,0 +1,6 @@
+apiVersion: v2
+name: db-connectivity-tester
+description: PostgreSQL connectivity tester using Secrets Store CSI Driver and AWS Secrets Manager.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

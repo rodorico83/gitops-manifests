@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: db-tester-ingress
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | default "letsencrypt-production" | quote }}
+spec:
+  ingressClassName: {{ .Values.ingress.className | default "nginx" | quote }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | default "aws.rj-engineering.com" | quote }}
+      secretName: {{ .Values.ingress.tlsSecretName | default "db-tester-tls-cert" | quote }}
+  rules:
+    - host: {{ .Values.ingress.host | default "aws.rj-engineering.com" | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.service.name | default "mi-app-backend-service" | quote }}
+                port:
+                  number: {{ .Values.service.port | default 80 }}
