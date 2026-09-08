@@ -1,28 +1,14 @@
 # Configuración de réplicas
 replicaCount: 1
 
+namespace: production
+
 # Servicio interno de Kubernetes
 service:
   name: mi-app-backend-service
   type: ClusterIP
   port: 80
   targetPort: 8080
-
-# Exposición con Ingress NGINX y Cert-Manager
-ingress:
-  enabled: true
-  className: nginx
-  host: aws.rj-engineering.com
-  clusterIssuer: letsencrypt-production
-  tlsSecretName: db-tester-tls-cert
-
-# Cuenta de servicio IAM (IRSA) para AWS Secrets Manager
-serviceAccount:
-  name: aws-secrets-manager-sa
-
-# Nombre o ARN del secreto en AWS Secrets Manager
-secretsManager:
-  objectName: ""
 
 # Metadatos de red para conexión a la Base de Datos
 configMapData:

@@ -1,0 +1,135 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-bootstrap
+  namespace: argocd
+  # The finalizer ensures that if you delete this root app, all child apps (and their resources) are cleaned up.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # 🎯 ACTIVAR GO TEMPLATE (Permite lógica if/else, loops y funciones avanzadas)
+  goTemplate: true
+  generators:
+    - matrix:
+        generators:
+          # 1. First, find all app configuration files
+          - git:
+              repoURL: 'https://github.com'
+              revision: HEAD
+              files:
+                - path: "apps/*/config.json"
+          
+          # 2. Second, find ONLY the clusters that match this specific app's targets
+          - clusters:
+              selector:
+                matchLabels:
+                  # These match the keys inside your config.json dynamically!
+                  site: '{{targetSite}}'
+                  env: '{{targetEnv}}'
+  template:
+    metadata:
+      name: '{{targetEnv}}-{{targetSite}}-{{path.pathParam.1}}'
+
+      # 🛡️ LÓGICA CONDICIONAL DE SEGURIDAD PARA EL FINALIZER
+      finalizers:
+        { { - if ne .targetEnv "production" } }
+        - resources-finalizer.argocd.argoproj.io
+        { { - else } }
+        [ ] # En producción se deja vacío para evitar borrados accidentales de infraestructura
+        { { - end } }
+    spec:
+      project: default
+      sources:
+
+        - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
+          chart: '{{chartName}}'
+          targetRevision: '{{chartVersion}}'
+          path: '{{.chartPath}}'
+
+        # --- SOURCE B: Tus archivos de configuración locales en Git ---
+        - repoURL: 'https://github.com'
+          targetRevision: HEAD
+          helm:
+            ignoreMissingValueFiles: true
+            valueFiles:
+              # Usamos index .path.pathParam 1 para extraer el nombre de la carpeta (la app)
+              - '$values/apps/{{index .path.pathParam 1}}/values.yaml'
+              - '$values/apps/{{index .path.pathParam 1}}/values-infra-{{.targetEnv}}-{{.targetSite}}.yaml'
+
+#        Only when in the same repo as this file
+#        helm:
+#          ignoreMissingValueFiles: true
+#          valueFiles:
+#            - 'apps/{{path.pathParam.1}}/values.yaml'
+#            - 'apps/{{path.pathParam.1}}/values-infra-{{targetEnv}}.yaml'
+
+      destination:
+        name: '{{name}}' # Standard cluster name from Argo CD
+        namespace: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true  # Automatically creates namespaces if they don't exist    
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: '{{metadata.labels.environment}}-aws-bootstrap'
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            # 🎯 Solo se activa en clústeres que tengan esta etiqueta de AWS
+            provider: aws
+  template:
+    metadata:
+      name: '{{metadata.labels.environment}}-aws-bootstrap' # Genera: staging-cloud-app, prod-cloud-app
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
+        targetRevision: master
+        path: "envs/{{metadata.labels.environment}}/aws/apps"
+        helm:
+          valueFiles:
+            # 🎯 Carga dinámicamente "values-staging.yaml" o "values-production.yaml"
+            # según la etiqueta 'environment' que le pusiste al clúster en Terraform
+            - 'values-{{metadata.labels.environment}}.yaml'
+      destination:
+        server: '{{server}}' # URL del clúster detectado de AWS
+        namespace: default
+      syncPolicy:
+        automated: # Fully automated for Dev velocity
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true  # Automatically creates namespaces if they don't exist
+
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-bootstrap
+  namespace: argocd
+  # The finalizer ensures that if you delete this root app, all child apps (and their resources) are cleaned up.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
+    targetRevision: master             # Tracks the master branch for rapid development
+    path: "envs/dev/apps"  # 👈 Watches this directory for child app YAMLs
+  destination:
+    server: 'https://default.svc' # Target cluster for Dev
+    namespace: default                  # The App resources themselves are created in the argocd namespace
+  syncPolicy:
+    automated:                         # Fully automated for Dev velocity
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true           # Automatically creates namespaces if they don't exist
