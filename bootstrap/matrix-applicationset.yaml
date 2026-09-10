@@ -22,7 +22,7 @@ spec:
                   environment: '{{.targetEnv}}'
   template:
     metadata:
-      name: '{{.targetEnv}}-{{.targetSite}}-{{index .path.pathParam 1}}'
+      name: '{{.targetEnv}}-{{.targetSite}}-{{index (split "/" .chartPath) 1}}'
       #{{- if ne .targetEnv "production" }} Not working parsing error ; test with kubectl apply -f bootstrap/matrix-applicationset.yaml --dry-run=client
       finalizers:
         - resources-finalizer.argocd.argoproj.io
@@ -40,8 +40,8 @@ spec:
           helm:
             ignoreMissingValueFiles: true
             valueFiles:
-              - '$values/apps/{{index .path.pathParam 1}}/values-{{.targetEnv}}.yaml'
-              - '$values/apps/{{index .path.pathParam 1}}/values-infra-{{.targetEnv}}-{{.targetSite}}.yaml'
+              - '$values/apps/{{index (split "/" .chartPath) 1}}/values-{{.targetEnv}}.yaml'
+              - '$values/apps/{{index (split "/" .chartPath) 1}}/values-infra-{{.targetEnv}}-{{.targetSite}}.yaml'
 
       destination:
         name: '{{.name}}'
