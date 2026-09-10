@@ -1,7 +1,8 @@
 # Configuración de réplicas
 replicaCount: 1
 
-namespace: production
+namespace: dev
+environment: dev
 
 # Servicio interno de Kubernetes
 service:
@@ -12,7 +13,7 @@ service:
 
 # Metadatos de red para conexión a la Base de Datos
 configMapData:
-  DATABASE_ENDPOINT: "database.xyz.eu-west-1.rds.amazonaws.com"
+  DATABASE_ENDPOINT: "database.cf4acwm6m1ht.eu-south-2.rds.amazonaws.com"
   DATABASE_PORT: "5432"
 
 # Inyección segura de credenciales mapeadas por Secrets Store CSI

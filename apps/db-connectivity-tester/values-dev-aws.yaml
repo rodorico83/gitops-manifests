@@ -26,5 +26,5 @@ autoscaling:
   targetCPUUtilizationPercentage: 70  # Scales up faster (at 70% CPU load)
 
 karpenter:
-  capacityTypes: ["spot"] # Prod requires stable, non-interruptible instances
+  capacityTypes: ["on_demand"] # Prod requires stable, non-interruptible instances
   maxCpuLimit: 2000            # High safety cap to handle massive traffic surges

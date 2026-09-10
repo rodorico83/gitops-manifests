@@ -4,7 +4,7 @@ metadata:
   name: db-tester-ingress
   namespace: default
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | default "letsencrypt-production" | quote }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | default (printf "letsencrypt-%s" .Values.environment) | quote }}
 spec:
   ingressClassName: {{ .Values.ingress.className | default "nginx" | quote }}
   tls:
@@ -15,7 +15,7 @@ spec:
     - host: {{ .Values.ingress.host | default "aws.rj-engineering.com" | quote }}
       http:
         paths:
-          - path: /
+          - path: /{{ .Values.service.name | quote }}
             pathType: Prefix
             backend:
               service:
