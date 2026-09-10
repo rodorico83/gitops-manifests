@@ -7,7 +7,7 @@ namespace: development
 ingress:
   enabled: true
   className: nginx
-  host: aws.rj-engineering.com
+  host: db-tester.aws.rj-engineering.com
   clusterIssuer: letsencrypt-dev
   tlsSecretName: db-tester-tls-cert
 
