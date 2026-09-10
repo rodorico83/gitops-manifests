@@ -1,7 +1,0 @@
-targetSite: "aws"
-targetEnv: "prod"
-
-# Source chart location labels
-chartRepoUrl: "https://github.com/rodorico83/gitops-manifests.git"
-chartTargetRevision: "HEAD"        # production can pin to a stable tag!
-chartPath: "apps/db-connectivity-tester"

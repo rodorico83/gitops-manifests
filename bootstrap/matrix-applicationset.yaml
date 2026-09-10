@@ -18,13 +18,15 @@ spec:
           - clusters:
               selector:
                 matchLabels:
-                  site: '{{.targetSite}}'
-                  env: '{{.targetEnv}}'
+                  provider: '{{.targetSite}}'
+                  environment: '{{.targetEnv}}'
   template:
     metadata:
       name: '{{.targetEnv}}-{{.targetSite}}-{{index .path.pathParam 1}}'
+      #{{- if ne .targetEnv "production" }} Not working parsing error ; test with kubectl apply -f bootstrap/matrix-applicationset.yaml --dry-run=client
       finalizers:
         - resources-finalizer.argocd.argoproj.io
+      #{{- end }}
     spec:
       project: default
       sources:
