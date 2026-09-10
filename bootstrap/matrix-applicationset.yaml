@@ -32,11 +32,11 @@ spec:
 
       # 🛡️ LÓGICA CONDICIONAL DE SEGURIDAD PARA EL FINALIZER
       finalizers:
-        { { - if ne .targetEnv "production" } }
+        {{- if ne .targetEnv "production" }}
         - resources-finalizer.argocd.argoproj.io
-        { { - else } }
-        [ ] # En producción se deja vacío para evitar borrados accidentales de infraestructura
-        { { - end } }
+        {{- else }}
+        [] # En producción se deja vacío para evitar borrados accidentales de infraestructura
+        {{- end }}
     spec:
       project: default
       sources:
