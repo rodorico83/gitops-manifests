@@ -23,10 +23,8 @@ spec:
   template:
     metadata:
       name: '{{.targetEnv}}-{{.targetSite}}-{{index .path.pathParam 1}}'
-      {{- if ne .targetEnv "production" }}
       finalizers:
         - resources-finalizer.argocd.argoproj.io
-      {{- end }}
     spec:
       project: default
       sources:
