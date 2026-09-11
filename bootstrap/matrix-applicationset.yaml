@@ -38,7 +38,7 @@ spec:
           targetRevision: '{{.chartVersion}}'
           ref: values
           helm:
-            ignoreMissingValueFiles: true
+            ignoreMissingValueFiles: false
             valueFiles:
               - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}.yaml'
               - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}-{{.targetSite}}.yaml'
