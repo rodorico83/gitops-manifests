@@ -80,27 +80,27 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          #env:
-            #- name: DB_ENDPOINT
-              #valueFrom:
-                #configMapKeyRef:
-                  #name: database-network-metadata
-                  #key: DB_ENDPOINT
-            #- name: DB_PORT
-              #valueFrom:
-                #configMapKeyRef:
-                  #name: database-network-metadata
-                  #key: DB_PORT
-            #- name: DB_USER
-              #valueFrom:
-                #secretKeyRef:
-                  #name: db-k8s-secret
-                  #key: username
-            #- name: DB_PASSWORD
-              #valueFrom:
-                #secretKeyRef:
-                  #name: db-k8s-secret
-                  #key: password
+          env:
+            - name: host
+              valueFrom:
+                configMapKeyRef:
+                  name: database-network-metadata
+                  key: DB_ENDPOINT
+            - name: port
+              valueFrom:
+                configMapKeyRef:
+                  name: database-network-metadata
+                  key: DB_PORT
+            - name: username
+              valueFrom:
+                secretKeyRef:
+                  name: db-k8s-secret
+                  key: username
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: db-k8s-secret
+                  key: password
           #volumeMounts:
             #- name: secrets-store-inline
               #mountPath: "/mnt/secrets-store"
