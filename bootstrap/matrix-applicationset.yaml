@@ -33,16 +33,16 @@ spec:
         - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
           targetRevision: '{{.chartVersion}}'
           path: '{{.chartPath}}'
-
-        - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
-          targetRevision: '{{.chartVersion}}'
-          ref: values
           helm:
             ignoreMissingValueFiles: false
             valueFiles:
               - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}.yaml'
               - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}-{{.targetSite}}.yaml'
 
+        - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
+          targetRevision: '{{.chartVersion}}'
+          ref: values
+         
       destination:
         name: '{{.name}}'
         namespace: '{{.targetEnv}}'
