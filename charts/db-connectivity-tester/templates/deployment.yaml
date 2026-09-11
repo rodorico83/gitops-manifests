@@ -22,9 +22,9 @@ spec:
       containers:
         - name: web-validator
           image: python:3.11-alpine
-          envFrom:
-            - secretRef:
-                name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
+          #envFrom:
+          #  - secretRef:
+          #      name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
           command: [ "/bin/sh", "-c" ]
           args:
             - |
