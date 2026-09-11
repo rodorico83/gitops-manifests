@@ -1,8 +1,6 @@
 # Configuración de réplicas
 replicaCount: 1
 
-namespace: development
-
 # Exposición con Ingress NGINX y Cert-Manager
 ingress:
   enabled: true
