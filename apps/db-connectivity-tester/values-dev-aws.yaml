@@ -17,7 +17,7 @@ serviceAccount:
 
 # Nombre o ARN del secreto en AWS Secrets Manager
 secretsManager:
-  objectName: ""
+  objectName: "arn:aws:secretsmanager:eu-south-2:555968473487:secret:rds!db-9357b2fc-a475-4817-a1af-10c2d2e7090e-ZpStiK"
 
 autoscaling:
   enabled: true
