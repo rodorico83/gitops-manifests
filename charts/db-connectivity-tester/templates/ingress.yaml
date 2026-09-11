@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace | quote }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote }}
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: {{ .Values.ingress.className  | quote }}
   tls:
@@ -15,7 +16,7 @@ spec:
     - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          - path: /{{ .Values.service.name | quote }}
+          - path: /
             pathType: Prefix
             backend:
               service:
