@@ -41,7 +41,7 @@ spec:
             ignoreMissingValueFiles: true
             valueFiles:
               - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}.yaml'
-              - '$values/apps/{{.chartPath | base}}/values-infra-{{.targetEnv}}-{{.targetSite}}.yaml'
+              - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}-{{.targetSite}}.yaml'
 
       destination:
         name: '{{.name}}'
