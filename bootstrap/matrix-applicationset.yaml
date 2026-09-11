@@ -42,7 +42,7 @@ spec:
         - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
           targetRevision: '{{.chartVersion}}'
           ref: values
-         
+
       destination:
         name: '{{.name}}'
         namespace: '{{.targetEnv}}'

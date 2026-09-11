@@ -22,6 +22,9 @@ spec:
       containers:
         - name: web-validator
           image: python:3.11-alpine
+          envFrom:
+            - secretRef:
+                name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
           command: [ "/bin/sh", "-c" ]
           args:
             - |
@@ -36,10 +39,10 @@ spec:
 
               @app.route('/')
               def check_db():
-                  db_host = os.environ.get('DB_ENDPOINT')
-                  db_port = os.environ.get('DB_PORT')
-                  db_user = os.environ.get('DB_USER')
-                  db_pass = os.environ.get('DB_PASSWORD')
+                  db_host = os.environ.get('host')
+                  db_port = os.environ.get('port', '5432')
+                  db_user = os.environ.get('username')
+                  db_pass = os.environ.get('password')
 
                   cmd = f"PGPASSWORD={db_pass} pg_isready -h {db_host} -p {db_port} -U {db_user}"
                   result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -77,35 +80,35 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          env:
-            - name: DB_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  name: database-network-metadata
-                  key: DB_ENDPOINT
-            - name: DB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: database-network-metadata
-                  key: DB_PORT
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: db-k8s-secret
-                  key: username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-k8s-secret
-                  key: password
-          volumeMounts:
-            - name: secrets-store-inline
-              mountPath: "/mnt/secrets-store"
-              readOnly: true
-      volumes:
-        - name: secrets-store-inline
-          csi:
-            driver: "secrets-store.csi.k8s.io"
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "aws-db-secrets-provider"
+          #env:
+            #- name: DB_ENDPOINT
+              #valueFrom:
+                #configMapKeyRef:
+                  #name: database-network-metadata
+                  #key: DB_ENDPOINT
+            #- name: DB_PORT
+              #valueFrom:
+                #configMapKeyRef:
+                  #name: database-network-metadata
+                  #key: DB_PORT
+            #- name: DB_USER
+              #valueFrom:
+                #secretKeyRef:
+                  #name: db-k8s-secret
+                  #key: username
+            #- name: DB_PASSWORD
+              #valueFrom:
+                #secretKeyRef:
+                  #name: db-k8s-secret
+                  #key: password
+          #volumeMounts:
+            #- name: secrets-store-inline
+              #mountPath: "/mnt/secrets-store"
+              #readOnly: true
+      #volumes:
+        #- name: secrets-store-inline
+          #csi:
+            #driver: "secrets-store.csi.k8s.io"
+            #readOnly: true
+            #volumeAttributes:
+              #secretProviderClass: "aws-db-secrets-provider"
