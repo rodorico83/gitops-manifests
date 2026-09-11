@@ -3,5 +3,5 @@ targetEnv: "dev"
 
 # Source chart location labels
 chartRepoUrl: "https://github.com/rodorico83/gitops-manifests.git"
-chartVersion: "HEAD"        # production can pin to a stable tag!
+chartVersion: "master"        # production can pin to a stable tag!
 chartPath: "apps/db-connectivity-tester"
