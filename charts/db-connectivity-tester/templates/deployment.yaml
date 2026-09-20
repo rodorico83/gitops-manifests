@@ -22,10 +22,10 @@ spec:
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
 
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 10001
-        fsGroup: 10001
+      #securityContext:
+      #  runAsNonRoot: true
+      #  runAsUser: 10001
+      #  fsGroup: 10001
 
       containers:
         - name: web-validator
