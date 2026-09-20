@@ -41,7 +41,7 @@ spec:
               export PYTHONPATH=/tmp/deps
 
               # 2. Escribir el script del servidor web interactivo
-              cat << 'EOF' > app.py
+              cat << 'EOF' > /tmp/app.py
               import os, subprocess
               from flask import Flask
               app = Flask(__name__)
@@ -79,6 +79,7 @@ spec:
 
               # 3. Arrancar el servidor web
               echo "Iniciando validador web en el puerto 8080..."
+              cd /tmp
               python app.py
           ports:
             - containerPort: 8080
