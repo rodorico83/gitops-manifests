@@ -22,3 +22,18 @@ autoscaling:
 karpenter:
   capacityTypes: ["on_demand"] # Prod requires stable, non-interruptible instances
   maxCpuLimit: 2000            # High safety cap to handle massive traffic surges
+
+
+governance:
+  enabled: true
+  quota:
+    requestsCpu: "1000m"
+    requestsMemory: "1Gi"
+    limitsCpu: "2000m"
+    limitsMemory: "2Gi"
+    pods: 10
+  limitRange:
+    defaultCpu: "500m"
+    defaultMemory: "256Mi"
+    defaultRequestCpu: "100m"
+    defaultRequestMemory: "128Mi"

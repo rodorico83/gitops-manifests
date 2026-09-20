@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: "{{ .Release.Name }}-limitrange"
+  namespace: "{{ .Values.namespace | default .Release.Namespace }}"
+  annotations:
+    argocd.argoproj.io/sync-wave: "1" #
+spec:
+  limits:
+    - type: Container
+      # Valores asignados automáticamente si el desarrollador no especifica resources
+      default:
+        cpu: "{{ .Values.governance.limitRange.defaultCpu }}"
+        memory: "{{ .Values.governance.limitRange.defaultMemory }}"
+      defaultRequest:
+        cpu: "{{ .Values.governance.limitRange.defaultRequestCpu }}"
+        memory: "{{ .Values.governance.limitRange.defaultRequestMemory }}"
+
+      # Rango permitido por contenedor individual
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+      max:
+        cpu: "1000m"
+        memory: "1Gi"

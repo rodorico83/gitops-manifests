@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: db-connectivity-tester-hpa
+  name: {{ .Values.namespace | quote }}
   namespace: {{ .Values.namespace | quote }}
 spec:
   scaleTargetRef:
@@ -28,4 +28,26 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
   {{- end }}
+
+  # ---------- CONFIGURACIÓN DEL BEHAVIOR ----------
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600 # Mira los últimos 10 minutos antes de desescalar (300 default)
+      policies:
+      - type: Percent
+        value: 10          # No permitas que se elimine más del 10% de los Pods...
+        periodSeconds: 60  # ... en una ventana de 1 minuto.
+      selectPolicy: Max
+
+    # Escalado agresivo
+    scaleUp:
+      stabilizationWindowSeconds: 10 # Reacciona INMEDIATAMENTE al pico de tráfico (0 default)
+      policies:
+        - type: Percent
+          value: 10 #200         # Permite aumentar las réplicas hasta un 200% (triplicar)
+          periodSeconds: 15  # ... cada 15 segundos si es necesario.
+        - type: Pods
+          value: 4           # O añade un mínimo de 4 Pods fijos si el porcentaje da menos.
+          periodSeconds: 15
+      selectPolicy: Max    # Elige la política que cree MÁS Pods para estar seguros.
 {{- end }}

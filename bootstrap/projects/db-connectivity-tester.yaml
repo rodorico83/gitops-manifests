@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: db-connectivity-tester
+  namespace: argocd
+spec:
+  description: "Proyecto de prueba"
+  # Restringe a qué repositorios Git tiene acceso
+  sourceRepos:
+    - "https://github.com/rodorico83/gitops-manifests.git"
+  # Restringe a qué clúster y namespace pueden desplegar
+  destinations:
+    - name: "dev-aws-cluster"
+      namespace: "db-connectivity-tester"
+    - name: "prod-aws-cluster"
+      namespace: "db-connectivity-tester"
+  # Bloquea qué recursos de clúster NO pueden crear (ej: no pueden crear ClusterRoles ni StorageClasses)
+  clusterResourceBlacklist:
+    - group: "rbac.authorization.k8s.io"
+      kind: "ClusterRole"
+  roles:
+    - name: developer
+      description: "Permisos de sync solo en dev"
+      policies:
+        - p, proj:db-connectivity-tester:developer, applications, sync, db-connectivity-tester/dev-*, allow
+        - p, proj:db-connectivity-tester:developer, applications, get, db-connectivity-tester/*, allow
+      groups:
+        - "sso:developers-db-connectivity-tester"

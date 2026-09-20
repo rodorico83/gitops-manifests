@@ -45,7 +45,7 @@ spec:
 
       destination:
         name: '{{.name}}'
-        namespace: '{{.targetEnv}}'
+        namespace:  '{{.targetEnv}}-{{.chartPath | base}}'
       syncPolicy:
         automated:
           prune: true

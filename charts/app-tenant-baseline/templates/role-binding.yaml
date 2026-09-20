@@ -1,0 +1,31 @@
+# 1. Rol de sólo lectura para desarrolladores en namespace 'dev'
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: "{{ .Values.namespace  }}"
+  name: "{{ .Release.Name }}-read-role"
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+rules:
+  - apiGroups: ["", "apps", "batch"]
+    resources: ["pods", "services", "deployments", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log", "pods/portforward"]
+    verbs: ["get", "create"] # Permite ver logs y port-forward, pero no editar recursos
+---
+
+# 2. Vinculación del rol al grupo de usuarios de la app
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ .Release.Name }}-role-binding"
+  namespace: "{{ .Values.namespace  }}"
+subjects:
+  - kind: Group
+    name: "sso:developers-db-connectivity-tester" # Mapeado desde el proveedor de identidad OIDC
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: "{{ .Release.Name }}-read-role"
+  apiGroup: rbac.authorization.k8s.io

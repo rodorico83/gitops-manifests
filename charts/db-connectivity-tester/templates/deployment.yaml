@@ -1,10 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: db-connectivity-tester
+  name: {{ .Values.namespace | quote }}
   namespace: {{ .Values.namespace | quote }}
   labels:
     app: db-tester
+  annotations:
+    argocd.argoproj.io/sync-wave: "2" # <-- Se ejecuta despues del tenant-baseline
 spec:
   replicas: 1
   selector:
@@ -19,6 +21,12 @@ spec:
         secret.reloader.stakater.com/reload: "db-k8s-secret"
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+
       containers:
         - name: web-validator
           image: python:3.11-alpine
@@ -29,7 +37,7 @@ spec:
           args:
             - |
               # 1. Instalar el driver de Postgres y Flask en memoria
-              pip install flask psycopg2-binary
+              pip install --user flask psycopg2-binary
 
               # 2. Escribir el script del servidor web interactivo
               cat << 'EOF' > app.py
@@ -112,3 +120,11 @@ spec:
             #readOnly: true
             #volumeAttributes:
               #secretProviderClass: "aws-db-secrets-provider"
+
+          volumeMounts:
+            - name: s3-volume
+              mountPath: {{ .Values.s3Storage.mountPath }}
+      volumes:
+        - name: s3-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-s3-pvc
