@@ -121,10 +121,10 @@ spec:
             #volumeAttributes:
               #secretProviderClass: "aws-db-secrets-provider"
 
-          volumeMounts:
-            - name: s3-volume
-              mountPath: {{ .Values.s3Storage.mountPath }}
-      volumes:
-        - name: s3-volume
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-s3-pvc
+          #volumeMounts:
+            #- name: s3-volume
+              #mountPath: {{ .Values.s3Storage.mountPath }}
+      #volumes:
+        #- name: s3-volume
+          #persistentVolumeClaim:
+            #claimName: {{ .Release.Name }}-s3-pvc
