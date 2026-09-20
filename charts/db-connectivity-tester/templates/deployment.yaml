@@ -53,25 +53,32 @@ spec:
                   db_user = os.environ.get('username')
                   db_pass = os.environ.get('password')
 
-                  cmd = f"PGPASSWORD={db_pass} pg_isready -h {db_host} -p {db_port} -U {db_user}"
-                  result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-
-                  if result.returncode == 0:
-                      return """
+                  try:
+                      # Intento directo de conexión con psycopg2
+                      conn = psycopg2.connect(
+                          host=db_host,
+                          port=db_port,
+                          user=db_user,
+                          password=db_pass,
+                          connect_timeout=3
+                      )
+                      conn.close()
+                      return f"""
                       <div style='text-align:center; margin-top:10%; font-family:Arial, sans-serif;'>
                           <h1 style='color:#2ecc71;'>✅ [ÉXITO] Conexión Híbrida Establecida</h1>
                           <p style='font-size:18px;'>El Pod con SG dedicado ha alcanzado la base de datos de AWS de forma segura.</p>
-                          <p style='color:#7f8c8d;'>Endpoint: {0} | Puerto: {1}</p>
+                          <p style='color:#7f8c8d;'>Endpoint: {db_host} | Puerto: {db_port}</p>
                       </div>
-                      """.format(db_host, db_port)
-                  else:
-                      return """
+                      """
+                  except Exception as e:
+                      return f"""
                       <div style='text-align:center; margin-top:10%; font-family:Arial, sans-serif;'>
                           <h1 style='color:#e74c3c;'>❌ [FALLO] Conexión Interrumpida</h1>
-                          <p style='font-size:18px; color:#c0392b;'>Tiempo de espera agotado. Revise tablas de rutas, VPN o Security Groups.</p>
-                          <p style='color:#7f8c8d;'>Endpoint: {0} | Puerto: {1}</p>
+                          <p style='font-size:18px; color:#c0392b;'>Tiempo de espera agotado o error de autenticación.</p>
+                          <p style='color:#7f8c8d;'>Endpoint: {db_host} | Puerto: {db_port}</p>
+                          <p style='color:#95a5a6; font-size:12px;'>Detalle: {str(e)}</p>
                       </div>
-                      """.format(db_host, db_port)
+                      """
 
               if __name__ == '__main__':
                   app.run(host='0.0.0.0', port=8080)

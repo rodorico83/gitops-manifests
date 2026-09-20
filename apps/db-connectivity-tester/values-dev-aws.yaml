@@ -16,10 +16,6 @@ ingress:
   clusterIssuer: letsencrypt-dev
   tlsSecretName: db-tester-tls-cert
 
-# Cuenta de servicio IAM (IRSA) para AWS Secrets Manager
-serviceAccount:
-  name: aws-secrets-manager-sa
-
 autoscaling:
   enabled: true
   minReplicas: 1
