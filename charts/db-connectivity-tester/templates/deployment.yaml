@@ -37,7 +37,7 @@ spec:
           args:
             - |
               # 1. Instalar el driver de Postgres y Flask en memoria
-              pip install --user --no-cache-dir --target=/tmp/deps flask psycopg2-binary
+              pip install --no-cache-dir --target=/tmp/deps flask psycopg2-binary
               export PYTHONPATH=/tmp/deps
 
               # 2. Escribir el script del servidor web interactivo
