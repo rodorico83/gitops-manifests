@@ -1,3 +1,4 @@
+{{- if .Values.istio.enabled }}
 
 # Inyección Automática del Proxy Envoy
 #  Para que los microservicios formen parte de la malla sin modificar su código, se añade una etiqueta al namespace de la aplicación:
@@ -86,3 +87,6 @@ spec:
         - operation:
             methods: ["POST"]
             paths: ["/api/v1/charge"]
+
+
+{{- end }}

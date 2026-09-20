@@ -1,6 +1,9 @@
 # Configuración de réplicas
 replicaCount: 1
 
+istio:
+  enabled : false
+
 # Exposición con Ingress NGINX y Cert-Manager
 ingress:
   enabled: true
