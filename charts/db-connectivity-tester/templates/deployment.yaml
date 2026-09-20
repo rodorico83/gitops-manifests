@@ -75,7 +75,7 @@ spec:
                       <div style='text-align:center; margin-top:10%; font-family:Arial, sans-serif;'>
                           <h1 style='color:#e74c3c;'>❌ [FALLO] Conexión Interrumpida</h1>
                           <p style='font-size:18px; color:#c0392b;'>Tiempo de espera agotado o error de autenticación.</p>
-                          <p style='color:#7f8c8d;'>Endpoint: {db_host} | Puerto: {db_port}</p>
+                          <p style='color:#7f8c8d;'>Endpoint: {db_host} | Puerto: {db_port} | User {db_user} </p>
                           <p style='color:#95a5a6; font-size:12px;'>Detalle: {str(e)}</p>
                       </div>
                       """
