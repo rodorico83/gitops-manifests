@@ -4,6 +4,10 @@ replicaCount: 1
 istio:
   enabled : false
 
+
+secret_provider:
+  enabled: false
+
 # Exposición con Ingress NGINX y Cert-Manager
 ingress:
   enabled: true
