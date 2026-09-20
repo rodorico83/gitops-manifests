@@ -29,7 +29,7 @@ envFromSecrets:
 
 # Nombre o ARN del secreto en AWS Secrets Manager
 secretsManager:
-  objectName: "arn:aws:secretsmanager:eu-south-2:555968473487:secret:rds!db-9357b2fc-a475-4817-a1af-10c2d2e7090e-ZpStiK"
+  objectName: "arn:aws:secretsmanager:eu-south-2:555968473487:secret:rds!db-bb325e12-498a-47b3-b71e-cfa715473649-VixKQR"
 
 
 s3Storage:
