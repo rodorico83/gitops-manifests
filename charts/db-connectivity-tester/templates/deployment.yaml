@@ -43,6 +43,8 @@ spec:
               # 2. Escribir el script del servidor web interactivo
               cat << 'EOF' > /tmp/app.py
               import os, subprocess
+              sys.path.insert(0, '/tmp/deps') # Garantiza que Python encuentre el módulo
+              import psycopg2
               from flask import Flask
               app = Flask(__name__)
 
