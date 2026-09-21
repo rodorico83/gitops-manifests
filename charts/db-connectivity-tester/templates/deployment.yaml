@@ -73,6 +73,8 @@ spec:
                       </div>
                       """
                   except Exception as e:
+                      error_msg = str(e)
+                      print(f"Error en conexion: {error_msg}", flush=True)
                       return f"""
                       <div style='text-align:center; margin-top:10%; font-family:Arial, sans-serif;'>
                           <h1 style='color:#e74c3c;'>❌ [FALLO] Conexión Interrumpida</h1>
