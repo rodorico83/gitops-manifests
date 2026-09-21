@@ -22,10 +22,10 @@ spec:
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
 
-      #securityContext:
-      #  runAsNonRoot: true
-      #  runAsUser: 10001
-      #  fsGroup: 10001
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
 
       containers:
         - name: web-validator
@@ -42,7 +42,7 @@ spec:
 
               # 2. Escribir el script del servidor web interactivo
               cat << 'EOF' > /tmp/app.py
-              import os, subprocess
+              import os, sys, subprocess
               sys.path.insert(0, '/tmp/deps') # Garantiza que Python encuentre el módulo
               import psycopg2
               from flask import Flask
