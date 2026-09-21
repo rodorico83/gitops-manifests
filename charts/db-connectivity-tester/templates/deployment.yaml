@@ -9,6 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "2" # <-- Se ejecuta despues del tenant-baseline
 spec:
   replicas: 1
+  revisionHistoryLimit: 2
   selector:
     matchLabels:
       app: db-tester
