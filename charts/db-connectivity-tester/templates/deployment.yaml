@@ -62,6 +62,7 @@ spec:
                           port=db_port,
                           user=db_user,
                           password=db_pass,
+                          dbname="example-dev",
                           connect_timeout=3
                       )
                       conn.close()
