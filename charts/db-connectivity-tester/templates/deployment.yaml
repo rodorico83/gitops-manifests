@@ -157,7 +157,7 @@ spec:
             value: my-app-canary
       trafficRouting:
         nginx:
-          stableIngress: my-app-ingress  # Argo modificará automáticamente este Ingress
+          stableIngress: {{ .Values.namespace | quote }}  # Argo modificará automáticamente este Ingress
       steps:
         - setWeight: 5
         - pause: { duration: 10m }
