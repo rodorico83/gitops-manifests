@@ -146,7 +146,7 @@ spec:
 
   strategy:
     canary:
-      canaryService: "{{ .Values.service.name | quote }}-canary"
+      canaryService: "{{ .Values.service.name }}-canary"
       stableService: {{ .Values.service.name | quote }}
       # --- CONFIGURACIÓN DE TRAFFIC ROUTING CON NGINX ---
       analysis:
