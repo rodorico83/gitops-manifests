@@ -4,7 +4,6 @@ replicaCount: 1
 istio:
   enabled : false
 
-
 secret_provider:
   enabled: false
 
@@ -21,6 +20,7 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 1
   targetCPUUtilizationPercentage: 70  # Scales up faster (at 70% CPU load)
+  targetMemoryUtilizationPercentage: 70
 
 karpenter:
   capacityTypes: ["on_demand"] # Prod requires stable, non-interruptible instances
