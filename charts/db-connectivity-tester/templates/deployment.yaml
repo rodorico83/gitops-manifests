@@ -154,7 +154,7 @@ spec:
           - templateName: success-rate-check
         args:
           - name: service-name
-            value: my-app-canary
+            value: "{{ .Values.service.name }}-canary" #my-app-canary
       trafficRouting:
         nginx:
           stableIngress: {{ .Values.namespace | quote }}  # Argo modificará automáticamente este Ingress
