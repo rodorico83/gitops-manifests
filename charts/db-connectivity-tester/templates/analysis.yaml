@@ -10,8 +10,8 @@ spec:
       failureLimit: 3 # Si falla 3 veces consecutivas, hace ROLLBACK automático
       provider:
         prometheus:
-          address: http://prometheus-k8s.monitoring.svc.cluster.local:9090
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           query: |
-            sum(rate(http_requests_total{app="my-app", status=~"2.*"}[2m]))
+            sum(rate(http_requests_total{app="db-connectivity-tester", status=~"2.*"}[2m]))
             /
-            sum(rate(http_requests_total{app="my-app"}[2m]))
+            sum(rate(http_requests_total{app="db-connectivity-tester"}[2m]))
