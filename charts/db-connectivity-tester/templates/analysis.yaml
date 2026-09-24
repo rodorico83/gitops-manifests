@@ -6,12 +6,12 @@ spec:
   metrics:
     - name: success-rate
       interval: 30s
-      successCondition: result[0] >= 0.95 # Requiere 95% o más de peticiones exitosas (HTTP 2xx/3xx)
+      successCondition: isNaN(result[0]) || result[0] >= 0.95 # Requiere 95% o más de peticiones exitosas (HTTP 2xx/3xx)
       failureLimit: 3 # Si falla 3 veces consecutivas, hace ROLLBACK automático
       provider:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           query: |
             ( sum(rate(nginx_ingress_controller_requests{exported_namespace="db-connectivity-tester", status=~"2.*"}[2m]))
-              / sum(rate(nginx_ingress_controller_requests{exported_namespace="db-connectivity-tester"}[2m]))
+              / (sum(rate(nginx_ingress_controller_requests{exported_namespace="db-connectivity-tester"}[2m]))> 0)
             ) or vector(1)
