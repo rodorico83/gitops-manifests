@@ -23,6 +23,9 @@ spec:
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
 
+      nodeSelector:
+        karpenter.sh/nodepool: "low-cost-pool" 
+
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
