@@ -46,13 +46,17 @@ spec:
                 - ALL
           volumeMounts:
             - name: tmp-storage
-              mountPath: /tmp        -
+              mountPath: /tmp
           #envFrom:
             #- secretRef:
                 #name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
           command: [ "/bin/sh", "-c" ]
           args:
             - |
+              # Forzar a pip a realizar sus descargas y caché en el /tmp escribible
+              export TMPDIR=/tmp
+              export PIP_CACHE_DIR=/tmp/.cache
+
               # 1. Instalar el driver de Postgres y Flask en memoria
               pip install --no-cache-dir --target=/tmp/deps flask psycopg2-binary
               export PYTHONPATH=/tmp/deps
