@@ -40,7 +40,7 @@ spec:
           image: python:3.11-alpine
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true # We mount empty volume otherwise python scprit will fail writing on /tmp
+            readOnlyRootFilesystem: false # We mount empty volume otherwise python scprit will fail writing on /tmp
             capabilities:
               drop:
                 - ALL
