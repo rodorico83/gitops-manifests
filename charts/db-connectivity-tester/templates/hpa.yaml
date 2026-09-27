@@ -32,22 +32,22 @@ spec:
   # ---------- CONFIGURACIÓN DEL BEHAVIOR ----------
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 600 # Mira los últimos 10 minutos antes de desescalar (300 default)
+      stabilizationWindowSeconds: 60 # Mira los últimos 10 minutos antes de desescalar (300 default)
       policies:
       - type: Percent
-        value: 10          # No permitas que se elimine más del 10% de los Pods...
+        value: 100          # No permitas que se elimine más del 10% de los Pods...
         periodSeconds: 60  # ... en una ventana de 1 minuto.
       selectPolicy: Max
 
     # Escalado agresivo
     scaleUp:
-      stabilizationWindowSeconds: 10 # Reacciona INMEDIATAMENTE al pico de tráfico (0 default)
+      stabilizationWindowSeconds: 30 # Reacciona INMEDIATAMENTE al pico de tráfico (0 default)
       policies:
         - type: Percent
-          value: 10 #200         # Permite aumentar las réplicas hasta un 200% (triplicar)
-          periodSeconds: 15  # ... cada 15 segundos si es necesario.
-        - type: Pods
-          value: 4           # O añade un mínimo de 4 Pods fijos si el porcentaje da menos.
-          periodSeconds: 15
+          value: 100 #200         # aumento un 100% el numero de replicas
+          periodSeconds: 30       #  cada 15 segundos si es necesario.
+        #- type: Pods
+        #  value: 4           # O añade un mínimo de 4 Pods fijos si el porcentaje da menos.
+        #  periodSeconds: 15
       selectPolicy: Max    # Elige la política que cree MÁS Pods para estar seguros.
 {{- end }}

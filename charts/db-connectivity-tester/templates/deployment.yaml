@@ -17,6 +17,7 @@ spec:
     metadata:
       labels:
         app: db-tester
+        app.kubernetes.io/name : {{ .Values.namespace | quote }}
         #role: backend-app
       annotations:
         secret.reloader.stakater.com/reload: "db-k8s-secret"
