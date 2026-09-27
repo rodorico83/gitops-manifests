@@ -146,7 +146,7 @@ spec:
               #readOnly: true
       volumes:
         - name: tmp-storage
-            emptyDir: { }
+          emptyDir: { }
         #- name: secrets-store-inline
           #csi:
             #driver: "secrets-store.csi.k8s.io"
