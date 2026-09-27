@@ -27,6 +27,7 @@ karpenter:
   maxCpuLimit: 2000            # High safety cap to handle massive traffic surges
 
 app-tenant-baseline:
+  namespace: db-connectivity-tester
   governance:
     enabled: true
     quota:
