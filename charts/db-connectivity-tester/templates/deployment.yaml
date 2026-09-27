@@ -29,11 +29,24 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
+        runAsGroup: 10001
         fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault            # 👈 Muy recomendado por Wiz
+
 
       containers:
         - name: web-validator
           image: python:3.11-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true # We mount empty volume otherwise python scprit will fail writing on /tmp
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-storage
+              mountPath: /tmp        -
           #envFrom:
             #- secretRef:
                 #name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
@@ -131,7 +144,9 @@ spec:
             #- name: secrets-store-inline
               #mountPath: "/mnt/secrets-store"
               #readOnly: true
-      #volumes:
+      volumes:
+        - name: tmp-storage
+            emptyDir: { }
         #- name: secrets-store-inline
           #csi:
             #driver: "secrets-store.csi.k8s.io"
@@ -163,8 +178,25 @@ spec:
           stableIngress: {{ .Values.namespace | quote }}  # Argo modificará automáticamente este Ingress
       steps:
         - setWeight: 5
-        - pause: { duration: 10m }
+        - pause: { duration: 1m }
         - setWeight: 20
-        - pause: { duration: 30m }
+        - pause: { duration: 2m }
         - setWeight: 50
-        - pause: { duration: 10m }
+        - pause: { duration: 3m }
+
+  #blueGreen:
+    # Servicio que recibe el tráfico de Producción/Real
+    #activeService: {{ .Values.service.name | quote }}
+    # Servicio para probar la nueva versión antes de promoverla
+    #previewService: "{{ .Values.service.name }}-preview"
+    # Auto-promoción: si pones 'false', requerirá 'kubectl argo rollouts promote'
+    #autoPromotionEnabled: true
+    # Mantiene la versión antigua viva durante X segundos tras la promoción para hacer rollback instantáneo si es necesario
+    #scaleDownDelaySeconds: 30
+    # Pre-promotion Analysis: Ejecuta el test de Prometheus sobre el preview BEFORE de cambiar el tráfico real
+    #prePromotionAnalysis:
+      #templates:
+        #- templateName: success-rate-check
+      #args:
+        #- name: service-name
+          #value: "{{ .Values.service.name }}-preview"

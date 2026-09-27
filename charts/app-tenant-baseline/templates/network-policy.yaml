@@ -1,0 +1,62 @@
+# sub-charts/tenant/templates/network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: "{{ .Release.Name }}-security-policy"
+  namespace: "{{ .Values.namespace }}"
+  annotations:
+    argocd.argoproj.io/sync-wave: "1" # 👈 Se crea en la primera ola junto con las cuotas
+spec:
+  # Aplicar la política a los Pods que tengan la etiqueta de tu aplicación
+  podSelector:
+    matchLabels:
+      app: db-tester
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # 1. 🟢 TRAFICO ENTRANTE (Ingress): ¿Quién puede consumir tu Validador Web (Puerto 8080)?
+  ingress:
+    - from:
+        # Permitir tráfico únicamente si viene desde el controlador de NGINX Ingress
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx # 👈 Cambia esta etiqueta según tu Namespace de NGINX
+      ports:
+        - protocol: TCP
+          port: 8080
+
+  # 2. 🟢 TRAFICO SALIENTE (Egress): ¿A dónde puede conectarse tu aplicación de Python?
+  egress:
+    # Caso A: Permitir llamadas al servicio CoreDNS del clúster (Obligatorio para resolver URLs)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Caso B: Permitir llamadas a tu Base de Datos (PostgreSQL en AWS o local)
+    - to:
+        # Si tu base de datos está FUERA del clúster (ej. AWS RDS), permitimos todo el tráfico externo
+        # pero limitado estrictamente al puerto de la base de datos (5432)
+        - ipBlock:
+            cidr: 0.0.0.0/0 # Puedes restringirlo al CIDR específico de tu VPC de AWS (ej. 10.0.0.0/16)
+      ports:
+        - protocol: TCP
+          port: 5432 # 👈 Puerto de tu Postgres
+
+    # Caso C: Permitir llamadas a AWS S3 (Ya que tu ServiceAccount usa el rol de S3)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443  # S3 opera sobre HTTPS (Puerto 443)
