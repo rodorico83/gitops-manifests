@@ -2,8 +2,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: "{{ .Values.namespace  }}"
-  name: "{{ .Release.Name }}-read-role"
+  namespace: "{{ .Release.Namespace }}"
+  name: "{{ .Release.Namespace }}-read-role"
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 rules:

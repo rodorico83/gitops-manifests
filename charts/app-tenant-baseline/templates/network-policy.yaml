@@ -2,8 +2,8 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: "{{ .Values.namespace }}-security-policy"
-  namespace: "{{ .Values.namespace }}"
+  name: "{{ .Release.Namespace }}-security-policy"
+  namespace: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "1" # 👈 Se crea en la primera ola junto con las cuotas
 spec:
