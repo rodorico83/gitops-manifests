@@ -20,6 +20,6 @@ spec:
       description: "Permisos de sincronización para desarrolladores backend"
       # Formato: p, <role-name>, <resource>, <action>, <project>/<namespace>/<object>, <allow/deny>
       policies:
-        - p, role:developer, applications, get, {{ .Release.Namespace }}-app-project/*/*, allow
-        - p, role:developer, applications, sync, {{ .Release.Namespace }}-app-project/*/*, allow
-        - p, role:developer, applications, update, {{ .Release.Namespace }}-app-project/*/*, allow
+        - "p, role:developer, applications, get, {{ .Release.Namespace }}-app-project/*/*, allow"
+        - "p, role:developer, applications, sync, {{ .Release.Namespace }}-app-project/*/*, allow"
+        - "p, role:developer, applications, update, {{ .Release.Namespace }}-app-project/*/*, allow"

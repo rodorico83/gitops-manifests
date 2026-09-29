@@ -13,7 +13,7 @@ spec:
     limits.memory: "{{ .Values.governance.quota.limitsMemory  }}"
 
     # Límites de objetos para evitar saturación de etcd
-    pods: "2"                   # Máximo 10 pods simultáneos
+    pods: "3"                   # Máximo 10 pods simultáneos
     services: "5"
     persistentvolumeclaims: "3"  # Máximo 3 PVCs (ej. S3 / EBS)
     services.loadbalancers: "0"  # Prohibido crear NLBs directos en dev (se usa Ingress compartido)
