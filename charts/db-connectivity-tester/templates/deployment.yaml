@@ -36,6 +36,28 @@ spec:
         seccompProfile:
           type: RuntimeDefault            # 👈 Muy recomendado por Wiz
 
+      initContainers:
+        - name: check-credentials
+          image: busybox:1.36
+          env:
+            - name: host
+              valueFrom:
+                configMapKeyRef:
+                  name: database-network-metadata
+                  key: DB_ENDPOINT
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: db-k8s-secret
+                  key: password
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              if [ -z "$host" ] || [ -z "$password" ]; then
+                echo "ERROR: Faltan credenciales críticas"
+                exit 1
+              fi
+              echo "Credenciales validadas correctamente."
 
       containers:
         - name: web-validator
@@ -49,20 +71,13 @@ spec:
           volumeMounts:
             - name: tmp-storage
               mountPath: /tmp
-          #envFrom:
-            #- secretRef:
-                #name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
-          lifecycle:
-            postStart:
-              exec:
-                command: [ "/bin/sh", "-c" ]
-                args:
-                  - |
-                    # Validar rápido que las variables de entorno de AWS RDS existan
-                    if [ -z "$host" ] || [ -z "$password" ]; then
-                      echo "ERROR: Faltan credenciales críticas"
-                      exit 1 # 👈 Esto aborta el arranque del contenedor de inmediato
-                    fi
+
+          #lifecycle:
+            #postStart:
+              #exec:
+                #command: [ "/bin/sh", "-c" ]
+                #args:
+
           command: [ "/bin/sh", "-c" ]
           args:
             - |
