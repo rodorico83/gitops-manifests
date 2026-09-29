@@ -28,8 +28,8 @@ spec:
         - resources-finalizer.argocd.argoproj.io
       #{{- end }}
     spec:
-      #project: default
-      project: '{{.chartPath | base}}'
+      project: default
+      #project: '{{.chartPath | base}}'
       sources:
         - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
           targetRevision: '{{.chartVersion}}'
