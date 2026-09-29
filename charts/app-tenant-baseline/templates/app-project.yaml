@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: "{{ .Release.Namespace }}-app-project"
+  namespace: argocd
+spec:
+  description: "Frontera de seguridad para el equipo de desarrollo backend"
+
+  # 1. Repositorios de Git permitidos para este equipo
+  sourceRepos:
+    - {{ .Values.repoUrl | quote }}
+
+    # 2. Clústeres y Namespaces de Kubernetes donde pueden desplegar
+  destinations:
+    - namespace: {{ .Release.Namespace | quote }}
+      server: "https://kubernetes.default.svc" # Clúster local correcto
+
+  roles:
+    - name: developer
+      description: "Permisos de sincronización para desarrolladores backend"
+      # Formato: p, <role-name>, <resource>, <action>, <project>/<namespace>/<object>, <allow/deny>
+      policies:
+        - p, role:developer, applications, get, {{ .Release.Namespace }}-app-project/*/*, allow
+        - p, role:developer, applications, sync, {{ .Release.Namespace }}-app-project/*/*, allow
+        - p, role:developer, applications, update, {{ .Release.Namespace }}-app-project/*/*, allow

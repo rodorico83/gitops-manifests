@@ -21,6 +21,7 @@ spec:
         #role: backend-app
       annotations:
         secret.reloader.stakater.com/reload: "db-k8s-secret"
+        #reloader.stakater.com/auto: "true" to cover all secrets in deployment
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
 
@@ -51,6 +52,17 @@ spec:
           #envFrom:
             #- secretRef:
                 #name: db-k8s-secret  # Lee automáticamente username, password, host, etc.
+          lifecycle:
+            postStart:
+              exec:
+                command: [ "/bin/sh", "-c" ]
+                args:
+                  - |
+                    # Validar rápido que las variables de entorno de AWS RDS existan
+                    if [ -z "$host" ] || [ -z "$password" ]; then
+                      echo "ERROR: Faltan credenciales críticas"
+                      exit 1 # 👈 Esto aborta el arranque del contenedor de inmediato
+                    fi
           command: [ "/bin/sh", "-c" ]
           args:
             - |
@@ -69,6 +81,11 @@ spec:
               import psycopg2
               from flask import Flask
               app = Flask(__name__)
+
+              # Endpoint ligero para Startup y Liveness Probes
+              @app.route('/healthz')
+              def healthz():
+                  return "OK", 200
 
               @app.route('/')
               def check_db():
@@ -105,7 +122,7 @@ spec:
                           <p style='color:#7f8c8d;'>Endpoint: {db_host} | Puerto: {db_port} | User {db_user} </p>
                           <p style='color:#95a5a6; font-size:12px;'>Detalle: {str(e)}</p>
                       </div>
-                      """
+                      """, 503
 
               if __name__ == '__main__':
                   app.run(host='0.0.0.0', port=8080)
@@ -117,6 +134,32 @@ spec:
               python app.py
           ports:
             - containerPort: 8080
+
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 20  # Espera 5s iniciales para que pip empiece a descargar
+            periodSeconds: 10        # Evalúa cada 5s
+            failureThreshold: 5    # 24 intentos * 5s = 120s (2 min) de tolerancia máxima para el 'pip install'
+            successThreshold: 1
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 10       # Revisa cada 10s si el proceso Flask sigue vivo
+            timeoutSeconds: 2       # Si tarda más de 2s en responder el ping, cuenta como fallo
+            failureThreshold: 3     # Si falla 3 veces seguidas, reinicia el Pod
+
+          readinessProbe:
+            httpGet:
+              path: /                 # Golpea la raíz para forzar el test de conexión a la Base de Datos
+              port: 8080
+            periodSeconds: 15       # Monitorea la salud de la red/DB cada 15s
+            timeoutSeconds: 4       # Margen ligeramente superior al connect_timeout de psycopg2 (3s)              failureThreshold: 2     # Remueve el tráfico rápido si la conexión falla continuamente
+            successThreshold: 1
+
           resources:
             requests:
               cpu: "100m"     # 👈 HPA looks at this to calculate the 70% or 80% threshold
@@ -168,6 +211,10 @@ spec:
             #claimName: {{ .Release.Name }}-s3-pvc
 
   strategy:
+    #type: RollingUpdate
+    #rollingUpdate:
+    #  maxSurge: 1          # Cuántos Pods extra se pueden crear en el proceso
+    #  maxUnavailable: 0    # 👈 O 50%, justo aquí
     canary:
       canaryService: "{{ .Values.service.name }}-canary"
       stableService: {{ .Values.service.name | quote }}

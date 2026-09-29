@@ -27,6 +27,9 @@ karpenter:
   maxCpuLimit: 2000            # High safety cap to handle massive traffic surges
 
 app-tenant-baseline:
+  repoUrl: "https://github.com/rodorico83/gitops-manifests.git"
+  repoPath: "charts/db-connectivity-tester"
+  # Guardrails values
   governance:
     enabled: true
     quota:

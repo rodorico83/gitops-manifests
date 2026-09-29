@@ -28,7 +28,8 @@ spec:
         - resources-finalizer.argocd.argoproj.io
       #{{- end }}
     spec:
-      project: default
+      #project: default
+      project: '{{.chartPath | base}}-app-project'
       sources:
         - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
           targetRevision: '{{.chartVersion}}'
@@ -46,9 +47,27 @@ spec:
       destination:
         name: '{{.name}}'
         namespace:  '{{.chartPath | base}}'
+
+      # Ignore differencies in replicas, avoid collision with HPA modification no this field causing Argo Out-Of-Sync
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+          - /spec/replicas
+      - group: argoproj.io
+        kind: Rollout
+        jsonPointers:
+          - /spec/replicas
+
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+        retry:
+          limit: 4 # Maneja caídas temporales de la API de Kubernetes durante el despliegue
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 2m
         syncOptions:
           - CreateNamespace=true
