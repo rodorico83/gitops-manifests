@@ -27,5 +27,5 @@ subjects:
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: "{{ .Release.Name }}-read-role"
+  name: "{{ .Release.Namespace }}-read-role"
   apiGroup: rbac.authorization.k8s.io
