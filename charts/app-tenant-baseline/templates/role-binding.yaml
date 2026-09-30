@@ -19,7 +19,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: "{{ .Release.Name }}-role-binding"
+  name: "{{ .Release.Namespace }}-role-binding"
   namespace: "{{ .Release.Namespace }}"
 subjects:
   - kind: Group
