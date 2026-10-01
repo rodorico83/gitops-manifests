@@ -31,7 +31,7 @@ spec:
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
-          whenUnsatisfiable: ScheduleAnyway # Intentará mantener maxSkew=1, pero si una AZ no tiene espacio, desplegará en otra antes que bloquear el pod
+          whenUnsatisfiable: ScheduleAnyway # Intentará mantener maxSkew=1, pero si una AZ no tiene espacio, desplegará en otra antes que bloquear el pod (other option DoNotSchedule)
           labelSelector:
             matchLabels:
               app: db-tester
