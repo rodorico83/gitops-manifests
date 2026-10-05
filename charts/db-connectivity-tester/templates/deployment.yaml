@@ -1,5 +1,5 @@
 apiVersion: argoproj.io/v1alpha1 #apps/v1
-kind: Rollout #Deployment
+kind: Deployment # RollOut
 metadata:
   name: {{ .Values.namespace | quote }}
   namespace: {{ .Values.namespace | quote }}
@@ -233,26 +233,26 @@ spec:
             #claimName: {{ .Release.Name }}-s3-pvc
 
   strategy:
-    #type: RollingUpdate
-    #rollingUpdate:
-    #  maxSurge: 1          # Cuántos Pods extra se pueden crear en el proceso
-    #  maxUnavailable: 0    # 👈 O 50%, justo aquí
-    canary:
-      canaryService: "{{ .Values.service.name }}-canary"
-      stableService: {{ .Values.service.name | quote }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # Cuántos Pods extra se pueden crear en el proceso
+      maxUnavailable: 0    # 👈 O 50%, justo aquí
+    #canary:
+    #  canaryService: "{{ .Values.service.name }}-canary"
+    #  stableService: {{ .Values.service.name | quote }}
       # --- CONFIGURACIÓN DE TRAFFIC ROUTING CON NGINX ---
-      analysis:
-        templates:
-          - templateName: success-rate-check
-        args:
-          - name: service-name
-            value: "{{ .Values.service.name }}-canary" #my-app-canary
-      trafficRouting:
-        nginx:
-          stableIngress: {{ .Values.namespace | quote }}  # Argo modificará automáticamente este Ingress
-      steps:
-        - setWeight: 5
-        - pause: { duration: 1m }
+    #  analysis:
+    #    templates:
+    #      - templateName: success-rate-check
+    #    args:
+    #      - name: service-name
+    #        value: "{{ .Values.service.name }}-canary" #my-app-canary
+    #  trafficRouting:
+    #    nginx:
+    #      stableIngress: {{ .Values.namespace | quote }}  # Argo modificará automáticamente este Ingress
+    #  steps:
+    #    - setWeight: 5
+    #    - pause: { duration: 1m }
         #- setWeight: 20
         #- pause: { duration: 1m }
         #- setWeight: 50
