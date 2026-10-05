@@ -23,7 +23,7 @@ spec:
         secret.reloader.stakater.com/reload: "db-k8s-secret"
         #reloader.stakater.com/auto: "true" to cover all secrets in deployment
         # For Opentelemery init container to inject libraries
-        instrumentation.opentelemetry.io/inject-python: "monitoring/autoinstrumentation"
+        #instrumentation.opentelemetry.io/inject-python: "monitoring/autoinstrumentation"
 
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
