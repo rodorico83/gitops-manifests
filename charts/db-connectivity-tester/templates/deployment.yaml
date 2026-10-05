@@ -1,4 +1,4 @@
-apiVersion: apps/v1 #argoproj.io/v1alpha1 
+apiVersion: apps/v1 #argoproj.io/v1alpha1
 kind: Deployment # RollOut
 metadata:
   name: {{ .Values.namespace | quote }}
@@ -214,6 +214,7 @@ spec:
             #- name: secrets-store-inline
               #mountPath: "/mnt/secrets-store"
               #readOnly: true
+
       volumes:
         - name: tmp-storage
           emptyDir: { }
