@@ -39,7 +39,7 @@ app-tenant-baseline:
       limitsMemory: "2Gi"
       pods: 10
     limitRange:
-      defaultCpu: "500m"
-      defaultMemory: "256Mi"
+      defaultLimitCpu: "500m"
+      defaultLimitMemory: "256Mi"
       defaultRequestCpu: "100m"
       defaultRequestMemory: "128Mi"

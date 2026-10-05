@@ -10,8 +10,8 @@ spec:
     - type: Container
       # Valores asignados automáticamente si el desarrollador no especifica resources
       default:
-        cpu: "{{ .Values.governance.limitRange.defaultCpu }}"
-        memory: "{{ .Values.governance.limitRange.defaultMemory }}"
+        cpu: "{{ .Values.governance.limitRange.defaultLimitCpu }}"
+        memory: "{{ .Values.governance.limitRange.defaultLimitMemory }}"
       defaultRequest:
         cpu: "{{ .Values.governance.limitRange.defaultRequestCpu }}"
         memory: "{{ .Values.governance.limitRange.defaultRequestMemory }}"
