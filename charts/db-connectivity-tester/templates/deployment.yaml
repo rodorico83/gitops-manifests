@@ -47,28 +47,28 @@ spec:
         seccompProfile:
           type: RuntimeDefault            # 👈 Muy recomendado por Wiz
 
-      initContainers:
-        - name: check-credentials
-          image: busybox:1.36
-          env:
-            - name: host
-              valueFrom:
-                configMapKeyRef:
-                  name: database-network-metadata
-                  key: DB_ENDPOINT
-            - name: password
-              valueFrom:
-                secretKeyRef:
-                  name: db-k8s-secret
-                  key: password
-          command: [ "/bin/sh", "-c" ]
-          args:
-            - |
-              if [ -z "$host" ] || [ -z "$password" ]; then
-                echo "ERROR: Faltan credenciales críticas"
-                exit 1
-              fi
-              echo "Credenciales validadas correctamente."
+      #initContainers:
+      #  - name: check-credentials
+      #    image: busybox:1.36
+      #    env:
+      #      - name: host
+      #        valueFrom:
+      #          configMapKeyRef:
+      #            name: database-network-metadata
+      #            key: DB_ENDPOINT
+      #      - name: password
+      #        valueFrom:
+      #          secretKeyRef:
+      #            name: db-k8s-secret
+      #            key: password
+      #    command: [ "/bin/sh", "-c" ]
+      #    args:
+      #      - |
+      #        if [ -z "$host" ] || [ -z "$password" ]; then
+      #          echo "ERROR: Faltan credenciales críticas"
+      #          exit 1
+      #        fi
+      #        echo "Credenciales validadas correctamente."
 
       containers:
         - name: web-validator
