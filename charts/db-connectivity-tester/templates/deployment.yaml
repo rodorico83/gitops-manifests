@@ -1,4 +1,4 @@
-apiVersion: argoproj.io/v1alpha1 #apps/v1
+apiVersion: apps/v1 #argoproj.io/v1alpha1 
 kind: Deployment # RollOut
 metadata:
   name: {{ .Values.namespace | quote }}
