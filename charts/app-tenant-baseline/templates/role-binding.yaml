@@ -25,6 +25,10 @@ subjects:
   - kind: Group
     name: "sso:developers-db-connectivity-tester" # Mapeado desde el proveedor de identidad OIDC
     apiGroup: rbac.authorization.k8s.io
+  # Entrada para la ServiceAccount del namespace
+  - kind: ServiceAccount
+    name: "{{ .Values.serviceAccount.name }}" # O el nombre exacto de tu ServiceAccount
+    namespace: "{{ .Release.Namespace }}"
 roleRef:
   kind: Role
   name: "{{ .Release.Namespace }}-read-role"

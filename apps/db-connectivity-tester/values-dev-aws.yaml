@@ -29,6 +29,7 @@ karpenter:
 app-tenant-baseline:
   repoUrl: "https://github.com/rodorico83/gitops-manifests.git"
   repoPath: "charts/db-connectivity-tester"
+  serviceAccount: mi-app-backend-service
   # Guardrails values
   governance:
     enabled: true
