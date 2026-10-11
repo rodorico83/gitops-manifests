@@ -14,7 +14,7 @@ spec:
               repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
               revision: HEAD
               files:
-                - path: "apps/*/metadata-*.yaml"
+                - path: "apps/*/*/metadata.yaml"
           - clusters:
               selector:
                 matchLabels:
@@ -37,8 +37,8 @@ spec:
           helm:
             ignoreMissingValueFiles: false
             valueFiles:
-              - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}.yaml'
-              - '$values/apps/{{.chartPath | base}}/values-{{.targetEnv}}-{{.targetSite}}.yaml'
+              - '$values/apps/{{.chartPath | base}}/{{.targetEnv}}/values.yaml'
+              - '$values/apps/{{.chartPath | base}}/{{.targetEnv}}/values-{{.targetSite}}.yaml'
 
         - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
           targetRevision: '{{.chartVersion}}'

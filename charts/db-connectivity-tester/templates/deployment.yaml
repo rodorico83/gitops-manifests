@@ -39,6 +39,16 @@ spec:
             matchLabels:
               app: db-tester
 
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: db-tester
+                topologyKey: kubernetes.io/hostname
+
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -184,7 +194,7 @@ spec:
 
           resources:
             requests:
-              cpu: "100m"     # 👈 HPA looks at this to calculate the 70% or 80% threshold
+              cpu: "100m"     # HPA looks at this to calculate the 70% or 80% threshold
               memory: "128Mi"
             limits:
               cpu: "500m"
