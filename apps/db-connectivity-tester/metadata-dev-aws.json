@@ -1,7 +1,0 @@
-{
-  "targetSite": "aws",
-  "targetEnv": "dev",
-  "chartRepoUrl": "https://charts.my-company.com",
-  "chartName": "db-connectivity-tester",
-  "chartVersion": "1.2.3"
-}
