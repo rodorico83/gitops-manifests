@@ -1,5 +1,5 @@
 targetSite: "aws"
-targetEnv: "dev"
+targetEnv: "prod"
 
 # Source chart location labels
 chartRepoUrl: "https://github.com/rodorico83/gitops-manifests.git"
