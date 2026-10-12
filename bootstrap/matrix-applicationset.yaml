@@ -37,8 +37,8 @@ spec:
           helm:
             ignoreMissingValueFiles: false
             valueFiles:
-              - '$values/apps/{{.chartPath | base}}/{{.targetEnv}}/values.yaml'
-              - '$values/apps/{{.chartPath | base}}/{{.targetEnv}}/values-{{.targetSite}}.yaml'
+              - '$values/apps/{{.targetEnv}}/{{.chartPath | base}}/values.yaml'
+              - '$values/apps/{{.targetEnv}}/{{.chartPath | base}}/values-{{.targetSite}}.yaml'
 
         - repoURL: 'https://github.com/rodorico83/gitops-manifests.git'
           targetRevision: '{{.chartVersion}}'
