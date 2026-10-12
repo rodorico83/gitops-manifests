@@ -27,7 +27,8 @@ subjects:
     apiGroup: rbac.authorization.k8s.io
   # Entrada para la ServiceAccount del namespace
   - kind: ServiceAccount
-    name: {{ dig "serviceAccount" "name" "default" .Values | quote }} # O el nombre exacto de tu ServiceAccount
+    name: "{{ .Values.serviceAccount.name }}"
+    #name: {{ dig "serviceAccount" "name" "default" .Values | quote }} # O el nombre exacto de tu ServiceAccount
     namespace: "{{ .Release.Namespace }}"
 roleRef:
   kind: Role
