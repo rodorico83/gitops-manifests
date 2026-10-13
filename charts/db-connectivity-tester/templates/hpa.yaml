@@ -32,11 +32,11 @@ spec:
   # ---------- CONFIGURACIÓN DEL BEHAVIOR ----------
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 60 # Mira los últimos 10 minutos antes de desescalar (300 default)
+      stabilizationWindowSeconds: 60 # Espera ventana de tiempo antes de proceder al desescalado
       policies:
       - type: Percent
-        value: 100          # No permitas que se elimine más del 10% de los Pods...
-        periodSeconds: 60  # ... en una ventana de 1 minuto.
+        value: 100          # Siempre redondea hacia arriba por lo que 10% de 1 pod es un pod
+        periodSeconds: 60
       selectPolicy: Max
 
     # Escalado agresivo

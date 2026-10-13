@@ -53,9 +53,12 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
+        # Cambie los permisos del grupo propietario de cualquier volumen persistente (PVC) montado en el pod para que pertenezca al GID 10001
         fsGroup: 10001
+        # (Secure Computing Mode) provisto por el motor del contenedor (como containerd o Docker)
+        # filtra y bloquea llamadas al sistema (syscalls) innecesarias que el kernel de Linux expone al contenedor
         seccompProfile:
-          type: RuntimeDefault            # 👈 Muy recomendado por Wiz
+          type: RuntimeDefault
 
       #initContainers:
       #  - name: check-credentials
@@ -111,6 +114,16 @@ spec:
               import os, sys, subprocess
               sys.path.insert(0, '/tmp/deps') # Garantiza que Python encuentre el módulo
               import psycopg2
+              import logging
+
+              # Configurar logger de la app
+              logging.basicConfig(level=logging.INFO)
+              logger = logging.getLogger('db-tester')
+
+              # Silenciar el logger interno de werkzeug para que no ensucie con trace_id=0
+              log = logging.getLogger('werkzeug')
+              log.setLevel(logging.ERROR)
+
               from flask import Flask
               app = Flask(__name__)
 
@@ -125,7 +138,7 @@ spec:
                   db_port = os.environ.get('port', '5432')
                   db_user = os.environ.get('username')
                   db_pass = os.environ.get('password')
-
+                  logger.info(f"Verificando conexion a la base de datos {db_host}")
                   try:
                       # Intento directo de conexión con psycopg2
                       conn = psycopg2.connect(
@@ -197,7 +210,7 @@ spec:
               cpu: "100m"     # HPA looks at this to calculate the 70% or 80% threshold
               memory: "128Mi"
             limits:
-              cpu: "500m"
+              cpu: "200m"
               memory: "256Mi"
           env:
             - name: host
