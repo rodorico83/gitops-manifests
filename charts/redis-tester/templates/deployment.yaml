@@ -87,7 +87,7 @@ spec:
               python worker.py
           env:
             - name: REDIS_HOST
-              value: "redis-cluster-master.redis.svc.cluster.local"
+              value: "redis-cluster.redis.svc.cluster.local"
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_PASSWORD
