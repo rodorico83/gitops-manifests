@@ -58,7 +58,7 @@ spec:
 
               SENTINEL_HOST = os.environ.get('REDIS_HOST', 'redis-cluster.redis.svc.cluster.local')
               SENTINEL_PORT = int(os.environ.get('REDIS_PORT', 26379))
-              REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
+              REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', 'R0d0r1c0')
               MASTER_NAME = "mymaster"
 
               print("[*] Conectando a Redis Sentinel para descubrir el maestro...", flush=True)
@@ -67,7 +67,7 @@ spec:
               while not client:
                   try:
                       # Sentinel se conecta sin password (los pods de sentinel no lo piden)
-                      sentinel = Sentinel([(SENTINEL_HOST, SENTINEL_PORT)], socket_timeout=3)
+                      sentinel = Sentinel([(SENTINEL_HOST, SENTINEL_PORT)], sentinel_kwargs={"password": REDIS_PASSWORD}, socket_timeout=3)
                       master_address = sentinel.discover_master(MASTER_NAME)
                       print(f"[+] Maestro descubierto en {master_address}", flush=True)
 
