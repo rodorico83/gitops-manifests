@@ -1,0 +1,23 @@
+# 5. INGRESS PÚBLICO (Tu Ingress-NGINX de la frontera)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: test-mesh
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: istio-test.aws.rj-engineering.com # URL para tus pruebas
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: servicio-a-frontend
+                port:
+                  number: 80

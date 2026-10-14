@@ -1,0 +1,22 @@
+# Configuración de réplicas
+replicaCount: 1
+
+app-tenant-baseline:
+  repoUrl: "https://github.com/rodorico83/gitops-manifests.git"
+  repoPath: "charts/istio-test"
+  serviceAccount:
+    name: "istio-test"
+  # Guardrails values
+  governance:
+    enabled: true
+    quota:
+      requestsCpu: "1000m"
+      requestsMemory: "1Gi"
+      limitsCpu: "2000m"
+      limitsMemory: "2Gi"
+      pods: 10
+    limitRange:
+      defaultLimitCpu: "500m"
+      defaultLimitMemory: "256Mi"
+      defaultRequestCpu: "100m"
+      defaultRequestMemory: "128Mi"

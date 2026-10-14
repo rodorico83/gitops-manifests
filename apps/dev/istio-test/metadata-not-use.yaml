@@ -1,0 +1,7 @@
+targetSite: "aws"
+targetEnv: "dev"
+
+# Source chart location labels
+chartRepoUrl: "https://github.com/rodorico83/gitops-manifests.git"
+chartVersion: "master"        # production can pin to a stable tag!
+chartPath: "charts/istio-test"

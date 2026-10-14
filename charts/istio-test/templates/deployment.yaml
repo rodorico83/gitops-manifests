@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicio-a-frontend
+  namespace: test-mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      nodeSelector:
+        karpenter.sh/nodepool: "low-cost-pool"
+      containers:
+        - name: frontend-server
+          image: nginx:alpine
+          resources:
+            requests:
+              cpu: "100m"     # HPA looks at this to calculate the 70% or 80% threshold
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: config-volume
+          configMap:
+            name: frontend-nginx-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicio-b-backend
+  namespace: test-mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-app
+  template:
+    metadata:
+      labels:
+        app: backend-app
+    spec:
+      nodeSelector:
+        karpenter.sh/nodepool: "low-cost-pool"
+      containers:
+        - name: backend
+          image: ealen/echo-server:latest
+          resources:
+            requests:
+              cpu: "100m"     # HPA looks at this to calculate the 70% or 80% threshold
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"

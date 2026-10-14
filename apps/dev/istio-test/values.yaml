@@ -1,0 +1,6 @@
+# Configuración de réplicas
+replicaCount: 1
+
+namespace: test-mesh
+environment: dev
+

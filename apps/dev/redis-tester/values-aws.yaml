@@ -1,0 +1,4 @@
+serviceAccount:
+  name: "redis-tester-sa"
+secretsManager:
+  objectName: "arn:aws:secretsmanager:eu-south-2:555968473487:secret:apps/redis/credentials-xPKXDB"

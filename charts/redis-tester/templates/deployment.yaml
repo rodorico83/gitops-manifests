@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.namespace | quote }}
+  namespace: {{ .Values.namespace | quote }}
+  labels:
+    app: redis-tester
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: redis-tester
+  template:
+    metadata:
+      labels:
+        app: redis-tester
+        app.kubernetes.io/name: {{ .Values.namespace | quote }}
+      annotations:
+        secret.reloader.stakater.com/reload: "redis-secret-k8s"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | quote }}
+      nodeSelector:
+        karpenter.sh/nodepool: "low-cost-pool"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: redis-worker
+          image: python:3.11-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-storage
+              mountPath: /tmp
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              export TMPDIR=/tmp
+              export PIP_CACHE_DIR=/tmp/.cache
+              pip install --no-cache-dir --target=/tmp/deps redis
+              export PYTHONPATH=/tmp/deps:$PYTHONPATH
+
+              cat << 'EOF' > /tmp/worker.py
+              import os, sys, time, redis
+              sys.path.insert(0, '/tmp/deps')
+
+              REDIS_HOST = os.environ.get('REDIS_HOST', 'redis-cluster-master.redis.svc.cluster.local')
+              REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
+              REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
+
+              print("[*] Iniciando bucle continuo de comunicación con Redis...", flush=True)
+              
+              client = None
+              while not client:
+                  try:
+                      client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, socket_timeout=3, decode_responses=True)
+                      client.ping()
+                      print("[+] Conectado exitosamente al clúster de Redis.", flush=True)
+                  except Exception as e:
+                      print(f"[-] Esperando conexión con Redis: {e}", flush=True)
+                      time.sleep(5)
+
+              while True:
+                  try:
+                      client.set("k8s:worker:status", "Activo y operativo", ex=30)
+                      visitas = client.incr("k8s:worker:contador")
+                      val = client.get("k8s:worker:status")
+                      print(f"[>] Redis OK | Estado: {val} | Ciclo de escritura nº: {visitas}", flush=True)
+                  except Exception as e:
+                      print(f"[!] Error durante la operación con Redis: {e}", flush=True)
+                  
+                  time.sleep(10)
+              EOF
+
+              cd /tmp
+              python worker.py
+          env:
+            - name: REDIS_HOST
+              value: "redis-cluster-master.redis.svc.cluster.local"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret-k8s
+                  key: redis-password
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
+      volumes:
+        - name: tmp-storage
+          emptyDir: {}

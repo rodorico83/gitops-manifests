@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: waypoint
+  namespace: test-mesh
+  annotations:
+    argocd.argoproj.io/sync-wave: "-4" # 🎯 Se levanta justo después del namespace
+  labels:
+    gateway.networking.k8s.io/gateway-name: waypoint
+spec:
+  gatewayClassName: istio-waypoint
+  listeners:
+    - name: mesh
+      port: 15008
+      protocol: HBONE

@@ -1,0 +1,4 @@
+serviceAccount:
+  name: "rabbitmq-tester-sa"
+secretsManager:
+  objectName: "arn:aws:secretsmanager:eu-south-2:555968473487:secret:apps/rabbitmq/credentials-QQ9PNa"

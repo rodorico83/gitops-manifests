@@ -1,0 +1,5 @@
+replicaCount: 1
+namespace: redis-tester
+environment: dev
+
+

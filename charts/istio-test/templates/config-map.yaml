@@ -1,0 +1,22 @@
+# 2. CONFIGURACIÓN DEL FRONTEND (NGINX actuando como Servidor de App)
+# Configura a NGINX para que cuando reciba tráfico en "/", llame internamente al Backend.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: test-mesh
+data:
+  nginx.conf: |
+    events {}
+    http {
+        server {
+            listen 80;
+    
+            location / {
+                # 🎯 Redirige la petición internamente al DNS del Servicio B
+                proxy_pass http://servicio-b-backend.test-mesh.svc.cluster.local;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+        }
+    }

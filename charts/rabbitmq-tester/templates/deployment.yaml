@@ -1,0 +1,156 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.namespace | quote }}
+  namespace: {{ .Values.namespace | quote }}
+  labels:
+    app: rabbitmq-tester
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rabbitmq-tester
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-tester
+        app.kubernetes.io/name: {{ .Values.namespace | quote }}
+      annotations:
+        secret.reloader.stakater.com/reload: "rabbitmq-secret-k8s"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | quote }}
+      nodeSelector:
+        karpenter.sh/nodepool: "low-cost-pool-infra"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: rabbitmq-tester
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: rabbitmq-tester
+                topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: rabbitmq-worker
+          image: python:3.11-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-storage
+              mountPath: /tmp
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              export TMPDIR=/tmp
+              export PIP_CACHE_DIR=/tmp/.cache
+              pip install --no-cache-dir --target=/tmp/deps pika
+              export PYTHONPATH=/tmp/deps:$PYTHONPATH
+
+              cat << 'EOF' > /tmp/worker.py
+              import os, sys, time, json, pika
+              sys.path.insert(0, '/tmp/deps')
+
+              RABBIT_HOST = os.environ.get('RABBIT_HOST', 'rabbitmq-cluster.rabbitmq.svc.cluster.local')
+              RABBIT_USER = os.environ.get('RABBIT_USER', 'admin')
+              RABBIT_PASS = os.environ.get('RABBIT_PASS', '')
+
+              print("[*] Conectando a RabbitMQ para iniciar ciclo continuo...", flush=True)
+
+              connection = None
+              while not connection:
+                  try:
+                      credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PASS)
+                      params = pika.ConnectionParameters(host=RABBIT_HOST, credentials=credentials, connection_attempts=3, socket_timeout=3)
+                      connection = pika.BlockingConnection(params)
+                      print("[+] Conexión establecida con el clúster de RabbitMQ.", flush=True)
+                  except Exception as e:
+                      print(f"[-] Esperando al broker de RabbitMQ: {e}", flush=True)
+                      time.sleep(10)
+
+              channel = connection.channel()
+              channel.queue_declare(queue="pedidos_tienda", durable=True)
+
+              # Función callback para el consumidor interno del worker
+              def callback(ch, method, properties, body):
+                  data = json.loads(body)
+                  print(f"[✓] Mensaje consumido correctamente: {data}", flush=True)
+                  ch.basic_ack(delivery_tag=method.delivery_tag)
+
+              channel.basic_qos(prefetch_count=1)
+              channel.basic_consume(queue="pedidos_tienda", on_message_callback=callback)
+
+              contador = 0
+              print("[*] Iniciando bucle de producción y consumo continuo...", flush=True)
+
+              while True:
+                  try:
+                      # Simular envío periódico de un mensaje (Productor)
+                      contador += 1
+                      mensaje = {"id_evento": contador, "servicio": "rabbitmq-tester", "timestamp": time.time()}
+                      channel.basic_publish(
+                          exchange="",
+                          routing_key="pedidos_tienda",
+                          body=json.dumps(mensaje),
+                          properties=pika.BasicProperties(delivery_mode=2)
+                      )
+                      print(f"[x] Mensaje producido y enviado #{contador}", flush=True)
+
+                      # Procesar mensajes pendientes en la cola (Consumidor no bloqueante)
+                      connection.process_data_events(time_limit=1)
+                  except Exception as e:
+                      print(f"[!] Error en el canal de RabbitMQ: {e}", flush=True)
+                      try:
+                          credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PASS)
+                          params = pika.ConnectionParameters(host=RABBIT_HOST, credentials=credentials)
+                          connection = pika.BlockingConnection(params)
+                          channel = connection.channel()
+                          channel.queue_declare(queue="pedidos_tienda", durable=True)
+                      except Exception:
+                          pass
+
+                  time.sleep(5)
+              EOF
+
+              cd /tmp
+              python worker.py
+          env:
+            - name: RABBIT_HOST
+              value: "rabbitmq-cluster.rabbitmq.svc.cluster.local"
+            - name: RABBIT_USER
+              value: "admin"
+            - name: RABBIT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret-k8s
+                  key: rabbitmq-password
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
+      volumes:
+        - name: tmp-storage
+          emptyDir: {}
