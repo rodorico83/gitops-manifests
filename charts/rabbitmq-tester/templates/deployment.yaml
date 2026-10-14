@@ -23,7 +23,7 @@ spec:
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | quote }}
       nodeSelector:
-        karpenter.sh/nodepool: "low-cost-pool-infra"
+        karpenter.sh/nodepool: "low-cost-pool"
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
