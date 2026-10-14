@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.namespace | quote }}
-  namespace: {{ .Values.namespace | quote }}
+  name: redis-tester
+  namespace: redis-tester
   labels:
     app: redis-tester
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -17,11 +17,11 @@ spec:
     metadata:
       labels:
         app: redis-tester
-        app.kubernetes.io/name: {{ .Values.namespace | quote }}
+        app.kubernetes.io/name: redis-tester
       annotations:
         secret.reloader.stakater.com/reload: "redis-secret-k8s"
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name | quote }}
+      serviceAccountName: "redis-tester-sa"
       nodeSelector:
         karpenter.sh/nodepool: "low-cost-pool"
       securityContext:
@@ -56,25 +56,22 @@ spec:
               from redis.sentinel import Sentinel
               sys.path.insert(0, '/tmp/deps')
 
-              # Servicios de Sentinel y Clúster
               SENTINEL_HOST = os.environ.get('REDIS_HOST', 'redis-cluster.redis.svc.cluster.local')
-              SENTINEL_PORT = int(os.environ.get('SENTINEL_PORT', 26379))
+              SENTINEL_PORT = int(os.environ.get('REDIS_PORT', 26379))
               REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
-              MASTER_NAME = "mymaster" # Nombre por defecto del grupo maestro en Bitnami
+              MASTER_NAME = "mymaster"
 
               print("[*] Conectando a Redis Sentinel para descubrir el maestro...", flush=True)
 
               client = None
               while not client:
                   try:
-                      # Inicializamos el cliente Sentinel apuntando al servicio de sentinel (puerto 26379)
+                      # Sentinel se conecta sin password (los pods de sentinel no lo piden)
                       sentinel = Sentinel([(SENTINEL_HOST, SENTINEL_PORT)], socket_timeout=3)
-
-                      # Descubrimos automáticamente el maestro actual
                       master_address = sentinel.discover_master(MASTER_NAME)
                       print(f"[+] Maestro descubierto en {master_address}", flush=True)
 
-                      # Creamos la conexión de escritura directamente al maestro obtenido
+                      # El password se aplica aquí para autenticarnos contra el Redis Maestro real
                       client = sentinel.master_for(MASTER_NAME, password=REDIS_PASSWORD, socket_timeout=3, decode_responses=True)
                       client.ping()
                       print("[+] Conectado exitosamente al nodo maestro de Redis.", flush=True)
@@ -85,14 +82,12 @@ spec:
 
               while True:
                   try:
-                      # Todas las operaciones van dirigidas exclusivamente al maestro descubierto por Sentinel
                       client.set("k8s:worker:status", "Activo y operativo", ex=30)
                       visitas = client.incr("k8s:worker:contador")
                       val = client.get("k8s:worker:status")
                       print(f"[>] Redis OK | Estado: {val} | Ciclo de escritura nº: {visitas}", flush=True)
                   except Exception as e:
                       print(f"[!] Error durante la operación con el maestro de Redis: {e}", flush=True)
-                      # Si ocurre un failover, forzamos la reconexión con Sentinel en el siguiente ciclo
                       client = None
                       break
 
