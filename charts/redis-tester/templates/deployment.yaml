@@ -55,7 +55,7 @@ spec:
               import os, sys, time, redis
               sys.path.insert(0, '/tmp/deps')
 
-              REDIS_HOST = os.environ.get('REDIS_HOST', 'redis-cluster-master.redis.svc.cluster.local')
+              REDIS_HOST = os.environ.get('REDIS_HOST', 'redis-cluster.redis.svc.cluster.local')
               REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
               REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
 
