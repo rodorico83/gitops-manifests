@@ -87,8 +87,15 @@ spec:
                   except Exception as e:
                       print(f"[-] Esperando al broker de RabbitMQ: {e}", flush=True)
                       time.sleep(10)
+              
+              def setup_consumer(ch):
+                  ch.queue_declare(queue="pedidos_tienda", durable=True)
+                  ch.basic_qos(prefetch_count=1)
+                  ch.basic_consume(queue="pedidos_tienda", on_message_callback=callback)
 
               channel = connection.channel()
+              setup_consumer(channel)
+
               channel.queue_declare(queue="pedidos_tienda", durable=True)
 
               # Función callback para el consumidor interno del worker
@@ -125,6 +132,7 @@ spec:
                           params = pika.ConnectionParameters(host=RABBIT_HOST, credentials=credentials)
                           connection = pika.BlockingConnection(params)
                           channel = connection.channel()
+                          setup_consumer(channel)
                           channel.queue_declare(queue="pedidos_tienda", durable=True)
                       except Exception:
                           pass
