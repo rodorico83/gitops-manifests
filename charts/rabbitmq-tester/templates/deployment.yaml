@@ -87,7 +87,13 @@ spec:
                   except Exception as e:
                       print(f"[-] Esperando al broker de RabbitMQ: {e}", flush=True)
                       time.sleep(10)
-              
+
+              # Función callback para el consumidor interno del worker
+              def callback(ch, method, properties, body):
+                  data = json.loads(body)
+                  print(f"[✓] Mensaje consumido correctamente: {data}", flush=True)
+                  ch.basic_ack(delivery_tag=method.delivery_tag)
+
               def setup_consumer(ch):
                   ch.queue_declare(queue="pedidos_tienda", durable=True)
                   ch.basic_qos(prefetch_count=1)
@@ -97,12 +103,6 @@ spec:
               setup_consumer(channel)
 
               channel.queue_declare(queue="pedidos_tienda", durable=True)
-
-              # Función callback para el consumidor interno del worker
-              def callback(ch, method, properties, body):
-                  data = json.loads(body)
-                  print(f"[✓] Mensaje consumido correctamente: {data}", flush=True)
-                  ch.basic_ack(delivery_tag=method.delivery_tag)
 
               channel.basic_qos(prefetch_count=1)
               channel.basic_consume(queue="pedidos_tienda", on_message_callback=callback)
